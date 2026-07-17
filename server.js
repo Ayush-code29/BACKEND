@@ -1,21 +1,22 @@
 import express from 'express'
-import cors from "cors";
+import cors from 'cors'
+import { configDotenv } from 'dotenv';
 const app = express()
+configDotenv();
 app.use(cors());
 const port = process.env.PORT || 3000
 console.log(port)
 app.get('/api/jokes',(req,res)=>{
-  const jokes = [
-    {
-      id:1,
-      "joke":"This is joke 1",
-    },
-    {
-      id:2,
-      joke:"This is joke 2"
-    }
-  ]
-  res.send(jokes)
+    res.send([
+        {
+            id:1,
+            joke:"First joke"
+        },
+        {
+            id:2,
+            joke:"Second joke"
+        }
+    ])
 })
 app.get('/', (req, res) => {
   res.send('Hello World!')
