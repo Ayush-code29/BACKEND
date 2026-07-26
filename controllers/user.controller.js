@@ -14,12 +14,12 @@ const registeruser = asynchandler(async(req,res,next)=>{
     const {username,email,password,fullname} = req.body
     // console.log("Email is : ", email)
     if([fullname,username,email,password].some((field)=>{
-        field?.trim()===""
+        return field?.trim()===""
 
     })){
         throw new ApiError(400,"All fields are required")
     }
-    const existinguser = User.findOne({
+    const existinguser = await User.findOne({
         $or: [{username},{email}]
     })
     if(existinguser){
@@ -39,7 +39,7 @@ const registeruser = asynchandler(async(req,res,next)=>{
     throw new ApiError(400,"Avatar file is required")
 
    }
-   const user = User.create({fullname,avatar:avatar.url,coverimage:coverimage?.url || "", email,password,username:username.toLowerCase()});
+   const user = await User.create({fullname,avatar:avatar.url,coverimage:coverimage?.url || "", email,password,username:username.toLowerCase()});
   const createduser = await User.findById(user._id).select(
     "-password -refreshtoken"
   )
