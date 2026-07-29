@@ -137,8 +137,20 @@ const loginuser = asynchandler(async(req,res)=>{
 
 })
 const logoutuser = asynchandler(async(req,res)=>{
+    await User.findByIdAndUpdate(req.user._id,{$set:{
+        refreshtoken:undefined
+    }},{
+        new:true
+    })
     
 })
+const options = {
+    httpOnly: true,
+    secure:true,
+   }
+return res.status(200).clearCookie("accesstoken",options).clearCookie("refreshtoken",options)
 
 
-export { registeruser , loginuser};
+
+
+export { registeruser , loginuser,logoutuser};
