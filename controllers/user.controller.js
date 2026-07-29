@@ -6,8 +6,8 @@ import { uploadoncloudinary } from "../utils/cloudinary.js";
 const generateaccessandrefreshtokens = async(userid)=>{
     try {
         const user = await User.findById(userid);
-        const accesstoken = user.generateAccessToken
-        const refreshtoken = user.generateRefreshToken
+        const accesstoken = user.generateAccessToken()
+        const refreshtoken = user.generateRefreshToken()
         user.refreshtoken = refreshtoken
         await user.save({validateBeforeSave:false})
         return {accesstoken,refreshtoken}
@@ -142,13 +142,14 @@ const logoutuser = asynchandler(async(req,res)=>{
     }},{
         new:true
     })
-    
-})
-const options = {
+    const options = {
     httpOnly: true,
     secure:true,
    }
 return res.status(200).clearCookie("accesstoken",options).clearCookie("refreshtoken",options)
+    
+})
+
 
 
 
