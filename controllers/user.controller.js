@@ -3,7 +3,18 @@ import { ApiError } from "../utils/ApiEroor.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asynchandler } from "../utils/asyncHandler.js";
 import { uploadoncloudinary } from "../utils/cloudinary.js";
-
+const generateaccessandrefreshtokens = async(userid)=>{
+    try {
+        const user = await User.findById(userid);
+        const accesstoken = user.generateAccessToken
+        const refreshtoken = user.generateRefreshToken
+        user.refreshtoken = refreshtoken
+        await user.save({validateBeforeSave:false})
+        return {accesstoken,refreshtoken}
+    } catch (error) {
+        throw new ApiError(500,"Something went wrong while generating refresh and access token")
+    }
+}
 const registeruser = asynchandler(async (req, res, next) => {
 
     // ===========================
@@ -96,4 +107,38 @@ const registeruser = asynchandler(async (req, res, next) => {
     );
 });
 
-export { registeruser };
+const loginuser = asynchandler(async(req,res)=>{
+    const{email,username,password} = req.body;
+    if(!username || !email){
+        throw new ApiError(400,"Username or email required")
+    }
+    const user = await User.findOne({
+        $or:[{username},{email}]
+    })
+    if(!user){
+        throw new ApiError(404,"User does not exist")
+    }
+    if(!password){
+        throw new ApiError(400,"Password is required")
+    }
+    const ispasswordvalid = await user.isPasswordCorrect(password)
+    if(!ispasswordvalid){
+        throw new ApiError(401,"Invalid user credentials")
+    }
+   const {accesstoken,refreshtoken} = await generateaccessandrefreshtokens(user._id)
+   const loggedinuser = User.findById(user._id).select("-password -refreshtoken")
+   const options = {
+    httpOnly: true,
+    secure:true,
+   }
+   return res.status(200).cookie("accesstoken",accesstoken,options).cookie("refreshtoken",refreshtoken,options).json(new ApiResponse(200,{
+    user:loggedinuser,accesstoken,refreshtoken
+   },"User logged in Successfully"))
+
+})
+const logoutuser = asynchandler(async(req,res)=>{
+    
+})
+
+
+export { registeruser , loginuser};
