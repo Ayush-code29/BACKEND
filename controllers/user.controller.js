@@ -109,7 +109,7 @@ const registeruser = asynchandler(async (req, res, next) => {
 
 const loginuser = asynchandler(async(req,res)=>{
     const{email,username,password} = req.body;
-    if(!username || !email){
+    if(!(username || email)){
         throw new ApiError(400,"Username or email required")
     }
     const user = await User.findOne({
@@ -126,7 +126,7 @@ const loginuser = asynchandler(async(req,res)=>{
         throw new ApiError(401,"Invalid user credentials")
     }
    const {accesstoken,refreshtoken} = await generateaccessandrefreshtokens(user._id)
-   const loggedinuser = User.findById(user._id).select("-password -refreshtoken")
+   const loggedinuser = await User.findById(user._id).select("-password -refreshtoken")
    const options = {
     httpOnly: true,
     secure:true,
