@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-
+//subscription schema 
 const subscriptionschema = new mongoose.Schema({
     subscriber:{
         type:mongoose.Schema.Types.ObjectId,
